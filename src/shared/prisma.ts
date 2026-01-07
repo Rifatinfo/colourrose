@@ -5,7 +5,7 @@
 //===================== Prisma Client Setup =====================//
 import "dotenv/config";
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient} from "@prisma/client";
 // import { PrismaClient } from '../generated/prisma/client'
 
 //===================== PostgreSQL Connection Pool Setup =====================//
@@ -18,6 +18,7 @@ import { PrismaClient } from "@prisma/client";
 // });
 // const adapter = new PrismaPg(pool);
 const connectionString = `${process.env.DATABASE_URL}`
+// const connectionString = `postgresql://neondb_owner:npg_ImRfd6OGSp3j@ep-floral-shape-a4t46c3x-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require`
 console.log(connectionString);
 
 const adapter = new PrismaPg({ connectionString })
