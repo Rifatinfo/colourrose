@@ -3,16 +3,16 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 
 // Sanitize error to prevent exposing sensitive information in production
-// const sanitizeError = (error: any) => {
-//     // Don't expose Prisma errors in production
-//     if (process.env.NODE_ENV === "development" && error.code?.startsWith("P")) {
-//         return {
-//             message: "Database operation failed",
-//             errorDetails: null,
-//         };
-//     }
-//     return error;
-// };
+const sanitizeError = (error: any) => {
+    // Don't expose Prisma errors in production
+    if (process.env.NODE_ENV === "development" && error.code?.startsWith("P")) {
+        return {
+            message: "Database operation failed",
+            errorDetails: null,
+        };
+    }
+    return error;
+};
 
 const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
 
@@ -35,12 +35,12 @@ const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFun
     }
 
     // Sanitize error before sending response
-    // const sanitizedError = sanitizeError(error);
+    const sanitizedError = sanitizeError(error);
 
     res.status(statusCode).json({
         success,
         message,
-        error: error
+        error: sanitizedError
     })
 };
 
