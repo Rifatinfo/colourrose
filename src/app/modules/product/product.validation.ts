@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createProductSchema = z.object({
   name: z.string().min(1),
-  slug: z.string().min(1),
+  slug: z.string().optional(),
   sku: z.string().min(1),
   regularPrice: z.number().min(0),
   salePrice: z.number().optional(),
@@ -22,7 +22,7 @@ export const createProductSchema = z.object({
     )
     .optional(),
 
-  images: z.array(z.string()).optional(),
+  images: z.array(z.string()),
   tags: z.array(z.string()).optional(),
   additionalInformation: z
     .array(

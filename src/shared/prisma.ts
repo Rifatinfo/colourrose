@@ -17,8 +17,8 @@ import { PrismaClient} from "@prisma/client";
 //     connectionTimeoutMillis: 10000, // Return error after 10 seconds if unable to connect
 // });
 // const adapter = new PrismaPg(pool);
-// const connectionString = `${process.env.DATABASE_URL}`
-const connectionString = "postgresql://neondb_owner:npg_ImRfd6OGSp3j@ep-floral-shape-a4t46c3x.us-east-1.aws.neon.tech/neondb?sslmode=require"
+const connectionString = `${process.env.DATABASE_URL}`
+// const connectionString = "postgresql://neondb_owner:npg_ImRfd6OGSp3j@ep-floral-shape-a4t46c3x.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
 console.log(connectionString);
 
