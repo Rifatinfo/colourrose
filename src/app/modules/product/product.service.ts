@@ -149,7 +149,7 @@ const createProduct = async (req: ExpressRequest & { files?: Express.Multer.File
 
 const getProducts = async (params: any, options: IOptions) => {
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
-    const { searchTerm, ...filterData } = params;
+    const { searchTerm, category, ...filterData } = params;
 
     const andConditions: Prisma.ProductWhereInput[] = [];
     if (searchTerm) {
@@ -162,7 +162,15 @@ const getProducts = async (params: any, options: IOptions) => {
             }))
         })
     }
-
+    if (category) {
+        andConditions.push({
+            categories: {
+                some: {
+                    categoryId: category,
+                },
+            },
+        });
+    }
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
             AND: Object.keys(filterData).map(key => ({
@@ -173,7 +181,7 @@ const getProducts = async (params: any, options: IOptions) => {
         })
     }
 
-   
+
     const whereCondition: Prisma.ProductWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
     const result = await prisma.product.findMany({
         skip,
@@ -191,7 +199,7 @@ const getProducts = async (params: any, options: IOptions) => {
             tags: true,
         }
     });
-     const total = await prisma.product.count({ where: whereCondition });
+    const total = await prisma.product.count({ where: whereCondition });
     return {
         meta: {
             page,
@@ -199,7 +207,7 @@ const getProducts = async (params: any, options: IOptions) => {
             total,
         },
         data: result,
-    };  
+    };
 }
 
 const deleteProduct = async (productId: string) => {

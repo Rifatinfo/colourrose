@@ -8,7 +8,6 @@ import pick from "../../../utiles/pick";
 import { productFilterableFields } from "./product.constant";
 
 const createProduct = catchAsync(async (req: Request, res: Response) => {
-    // const productParsed = createProductSchema.parse(req.body);
     const product = await ProductService.createProduct(req as Request & { files?: Express.Multer.File[] });
 
     sendResponse(res, {
