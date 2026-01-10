@@ -1,11 +1,40 @@
 import prisma from "../../../shared/prisma";
-import { CreateProductInput } from "./product.validation"
+import { Request as ExpressRequest } from "express";
+import { optimizeAndSaveImage } from "../../../utiles/imageOptimizer";
+import { CreateProductInput } from "./product.validation";
+import { generateUniqueSlug } from "../../../utiles/generateSlug";
+import { IOptions, paginationHelper } from "../../../utiles/paginationHelper";
+import { Prisma } from "@prisma/client";
+import { productSearchableFields } from "./product.constant";
 
-const createProduct = async (data: CreateProductInput) => {
+
+const createProduct = async (req: ExpressRequest & { files?: Express.Multer.File[] }) => {
+    const data = req.body as CreateProductInput;
+
+    // ============= generate slug automatically ================//
+    const slug = await generateUniqueSlug(data.name);
+
+    const files = req.files ?? [];
+    const productFolder = `products/${slug}`;
+
+
+    let imageUrls: string[] = [];
+    if (files?.length) {
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+        for (const file of files) {
+            const filename = await optimizeAndSaveImage(file, productFolder);
+            imageUrls.push(
+                `${baseUrl}/uploads/${productFolder}/${filename}`
+            );
+        }
+    }
+
+
     return prisma.product.create({
         data: {
             name: data.name,
-            slug: data.slug,
+            slug,
             sku: data.sku,
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
@@ -13,6 +42,11 @@ const createProduct = async (data: CreateProductInput) => {
             stockStatus: data.stockStatus,
             shortDescription: data.shortDescription,
             fullDescription: data.fullDescription,
+
+            // ====== Images ======
+            images: {
+                create: imageUrls.map((url) => ({ url })),
+            },
 
             // ===== Categories =====
             categories: data.categories
@@ -73,13 +107,14 @@ const createProduct = async (data: CreateProductInput) => {
                 : undefined,
 
             // ===== Images =====
-            images: data.images
-                ? {
-                    create: data.images.map((url) => ({
-                        url,
-                    })),
-                }
-                : undefined,
+            // images: data.images
+            //     ? {
+            //         create: data.images.map((url) => ({
+            //             url,
+            //         })),
+            //     }
+            //     : undefined,
+
 
             // ===== Tags =====
             tags: data.tags
@@ -112,8 +147,41 @@ const createProduct = async (data: CreateProductInput) => {
     });
 };
 
-const getProducts = async () => {
-    return prisma.product.findMany({
+const getProducts = async (params: any, options: IOptions) => {
+    const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
+    const { searchTerm, ...filterData } = params;
+
+    const andConditions: Prisma.ProductWhereInput[] = [];
+    if (searchTerm) {
+        andConditions.push({
+            OR: productSearchableFields.map(field => ({
+                [field]: {
+                    contains: searchTerm,
+                    mode: "insensitive"
+                }
+            }))
+        })
+    }
+
+    if (Object.keys(filterData).length > 0) {
+        andConditions.push({
+            AND: Object.keys(filterData).map(key => ({
+                [key]: {
+                    equals: (filterData as any)[key]
+                }
+            }))
+        })
+    }
+
+   
+    const whereCondition: Prisma.ProductWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
+    const result = await prisma.product.findMany({
+        skip,
+        take: limit,
+        orderBy: {
+            [sortBy]: sortOrder
+        },
+        where: whereCondition,
         include: {
             categories: true,
             subCategories: true,
@@ -122,7 +190,16 @@ const getProducts = async () => {
             additionalInformation: true,
             tags: true,
         }
-    })
+    });
+     const total = await prisma.product.count({ where: whereCondition });
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };  
 }
 
 const deleteProduct = async (productId: string) => {
