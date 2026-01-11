@@ -22,7 +22,7 @@ export const createProductSchema = z.object({
     )
     .optional(),
 
-  images: z.array(z.string()),
+  images: z.array(z.string()).optional(), // image URLs
   tags: z.array(z.string()).optional(),
   additionalInformation: z
     .array(
