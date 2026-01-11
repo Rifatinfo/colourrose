@@ -10,8 +10,6 @@ import path from "path";
 const app: Application = express();
 app.use(cookieParser());
 
-
-
 app.use(cors({
     origin: ['https://colourrose-client.vercel.app'],
     credentials: true
