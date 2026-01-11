@@ -1,6 +1,6 @@
 import { StockStatus } from "@prisma/client";
 
-interface CreateProductInput {
+export interface CreateProductInput {
     name: string;
     slug?: string;
     sku: string;
@@ -13,7 +13,7 @@ interface CreateProductInput {
     categories?: string[];
     subCategories?: (string | { id: string; name: string; parentId?: string })[];
     variants?: Array<{ color?: string; size?: string; quantity?: number }>;
-    images: string[];
+    images?: string[];
     tags?: string[];
     additionalInformation?: Array<{ label: string; value: string }>;
 }
