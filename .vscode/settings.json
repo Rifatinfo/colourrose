@@ -1,0 +1,25 @@
+{
+  // This machine has 7.6 GB of RAM and the workspace holds three Node apps.
+  // Watching or indexing their build caches and dependencies is what made
+  // VS Code run out of memory and restart, so they are excluded here.
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/uploads/**": true,
+    "**/.git/objects/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/uploads": true,
+    "**/package-lock.json": true
+  },
+  "files.exclude": {
+    "**/.next": true
+  },
+  // The TypeScript server loads all three projects at once otherwise.
+  "typescript.tsserver.maxTsServerMemory": 3072,
+  "typescript.disableAutomaticTypeAcquisition": true
+}
